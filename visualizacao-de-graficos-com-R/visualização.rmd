@@ -1,0 +1,512 @@
+---
+title: 'Visualização de gráficos'
+subtitle: 'Implementação dos tipos de gráficos mais utilizados em análise de dados estatísticos'
+author: 'Diego Maia'
+lang: 'pt'
+output: 
+  html_document:
+    theme: readable
+           # https://bootswatch.com/3/readable/
+    highlight: tango
+    css: ../styles.css
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    fig_caption: true
+    df_print: paged
+    self_contained: true
+    # code_folding: show
+    # keep_md: true
+    # includes:
+    #   in_header: header.html
+    #   before_body: doc_prefix.html
+    #   after_body: doc_suffix.html
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+
+opts_chunk$set(
+  echo = TRUE, 
+  # collapse = TRUE,
+  # cache = TRUE,
+  out.width = "75%",
+  fig.align = 'center',
+  fig.width = 6,
+  fig.show = "hold"
+)
+
+options(dplyr.print_min = 6, dplyr.print_max = 6)
+
+# Supress crayon output
+options(crayon.enabled = FALSE)
+
+# Useful libraries
+# library(glue)
+# library(patchwork)
+# library(latex2exp)
+# library(kableExtra)
+
+# For nice dataframe summaries
+# library(summarytools)
+# st_options(
+#   plain.ascii = FALSE,
+#   dfSummary.varnumbers = FALSE,
+#   dfSummary.style = 'grid',
+#   dfSummary.graph.magnif = .75
+# )
+
+# Tidy!
+library(tidyverse)
+
+# Sober theme for ggplot
+theme_set(
+  theme_linedraw() +                         # Set simple theme for ggplot
+    theme(                                   # with some tweaks
+      axis.title.y.left = element_text(
+         angle = 0,                          # Never rotate y axis title
+         margin = margin(r = 20),            # Separate y axis title a little 
+         vjust = .5                          # Leave y axis title in the middle
+      ),
+      axis.title.x.bottom = element_text(
+         margin = margin(t = 20)             # Separate x axis title a little 
+      ),
+      axis.line = element_blank(),           # No axis lines
+      panel.border = element_blank(),        # No frame
+      panel.grid.minor = element_blank()     # No grid minor lines
+    )
+)
+
+# Avoid scientific notation and use a comma as decimal separator
+options(
+  scipen = 15,
+  OutDec = ','
+)
+
+# Format a number with thousand separators (default point)
+# and decimal comma enclosed in curly braces for LaTeX printing.
+# CAREFUL: if called outside math mode, will print the braces!
+fm <- function(x, big = '.', decimal = '{,}') {
+  if (!is.numeric(x)) {
+    x
+  } else {
+    prettyNum(x, big.mark = big, decimal.mark = decimal)
+  }
+
+}
+
+```
+
+```{js javascript-init, echo=FALSE}
+
+// Make off-site links open in a new window/tab
+function changeTargets() {
+  $("a").attr(
+    "target", function() {
+      // Load local links locally
+      if (this.host == location.host) return "_self"
+      // Load off-site links in a new window
+      else return "_blank";
+    }
+  );
+}
+
+// Execute when document is ready
+$(
+  changeTargets
+)
+```
+
+
+# Scatterplots
+
+```{r trabalhadores, echo=FALSE}
+library("ggplot2")
+library(hrbrthemes)
+
+trabalhadores <- tibble(
+  Horas = c(33, 37, 34, 40),
+  Salario = c(12.16, 9.98, 10.79, 11.71),
+)
+
+trabalhadores %>%
+ggplot(aes(x = Horas, y=Salario))+
+  geom_point(color = "red", fill = "red") + 
+  labs(title = 'Número de horas trabalhadas / Salário por hora de 12 trabalhadores',
+       x = 'Horas',
+       y = 'Salário (em dólares)') + 
+   theme_ipsum(plot_title_size = 12, axis_title_size = 10)
+  
+```
+
+
+```{r edificios, echo=FALSE}
+library("ggplot2")
+library(hrbrthemes)
+
+edificios <- tibble(
+  Altura = c(992, 780, 762, 756, 741, 732, 714, 662, 579),
+  Andares = c(71, 56, 53, 55, 47, 53, 50, 49, 40),
+)
+
+edificios %>%
+ggplot(aes(x = Altura, y=Andares))+
+  geom_point(color = "blue", fill = "blue", shape = 21)+
+  labs(title='Alturas / Número de andares de nove edifícios em Houston',
+       subtitle ='(Fonte: Emporis Corporation.)',
+       x = 'Altura(pés)',
+       y = 'Número de andares'
+       ) + 
+  theme_ipsum(plot_title_size = 12, axis_title_size = 10)
+```
+
+
+```{r Dwyane, echo=FALSE}
+library("ggplot2")
+library(hrbrthemes)
+
+DwyaneWade <- tibble(
+  Jogos = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+  Minutos = c(35, 35, 34, 28, 32, 33, 40, 29, 38, 34, 32, 34),
+  PontosMarcados = c(29, 15, 14, 22, 22, 8, 19, 6, 28, 18, 19, 34))
+
+DwyaneWade %>%
+ggplot(aes(x = Minutos, y=PontosMarcados))+
+  geom_point(color = "purple", fill = "purple", shape = 21)+
+  labs(title='A quantidade de minutos que Dwyane Wade jogou nos primeiros 12 jogos da temporada 2012–2013 da NBA relacionada com os pontos marcados',
+       subtitle ='(Fonte: National Basketball Association.)',
+       x = 'Minutos',
+       y = 'Pontos marcados'
+       ) + 
+  theme_ipsum(plot_title_size = 12, axis_title_size = 10)
+```
+
+::: {.rmdbox}
+  De acordo com o gráfico e com informações obtidas da tabela, a média de pontos marcados do jogador Dwyane Wade, quando ele atuou de 34 minutos(mediana) para mais, é
+um pouco superior à média da primeira metade. A média de pontos calculada na primeira metade dos valores de x(minutos) foi de 18.3, enquanto a média calculada na segunda metade foi de 20.6.  Portanto, quando ele esteve por mais tempo em quadra a média de pontos dele acresceu.
+:::
+
+# Histogramas 
+
+```{r pimentas, echo=FALSE}
+library("ggplot2")
+library(hrbrthemes)
+
+pimentas <- data.frame(ardencia = c(35, 51, 44, 42, 37, 38, 36, 39, 44, 43, 40, 40, 32, 39, 41, 38, 42, 39, 40, 46, 37, 35, 41, 39))
+
+ggplot(pimentas) + 
+  aes(x = ardencia)+
+  geom_histogram(color = "black", 
+                 fill = "darkcyan",
+                 alpha = 0.9, 
+                 breaks = seq(32, 52, 4)
+                 ) +
+  scale_x_continuous(breaks = seq(32, 52, 4))+
+  
+  geom_freqpoly(breaks = seq(32, 52, 4), color='red') + 
+ 
+  labs(title = 'Níveis de ardência de 24 pimentas do tipo tabasco',
+       subtitle = "", 
+       caption = "",
+       x = "Níveis de ardência (escala Scoville)",
+       y = "Frequência") +
+  theme_ipsum(plot_title_size = 12, axis_title_size = 10)
+
+```
+
+
+```{r, echo=FALSE}
+library("ggplot2")
+library(hrbrthemes)
+
+mulheres <- data.frame(reacao = c(507, 389, 305, 291, 336, 310, 514, 442, 
+                                  373, 428, 387, 454, 323, 441, 
+                                  388, 426, 411, 382, 320, 450, 309, 416, 
+                                  359, 388, 307, 337, 469, 351, 422, 413))
+
+# Amplitude = 514 - 291 = 223
+# Amplitude de cada classe: A/n°classes =  223/8 = 28
+
+ggplot(mulheres) + 
+  aes(x = reacao)+
+  geom_histogram(color = "black", 
+                 fill = "green",
+                 alpha = 0.9, 
+                 breaks = seq(291, 515, 28)
+  ) +
+  scale_x_continuous(breaks = seq(291, 515, 28))+
+  
+  geom_freqpoly(breaks = seq(291, 515, 28), color='red') + 
+  
+  labs(title = 'Tempos de reação de 30 mulheres adultas a um estímulo auditivo',
+       subtitle = "", 
+       caption = "",
+       x = "Tempo de reação (milissegundos)",
+       y = "Frequência") +
+   theme_ipsum(plot_title_size = 12, axis_title_size = 10)
+```
+```{r, echo=FALSE}
+library("ggplot2")
+library(hrbrthemes)
+
+Triglicerideos <- tibble(
+            niveis = c(209, 140, 155, 170, 265, 138, 180, 295, 250, 320, 270, 225, 215, 390, 420, 462, 150, 200, 400, 295, 240, 200, 190, 145, 160, 175))
+
+# Amplitude = 462 - 138 = 324
+# qtd de classes: i = 1 + 3.3 * ln(26)/ln(10) = 6 classes
+# Amplitude de cada classe: A/n°classes =  324/6 = 54
+
+Triglicerideos %>%
+ ggplot(aes(x = niveis)) +
+        geom_histogram(color = "black", fill = "red", alpha = 0.9, breaks = seq(138, 462, 54))  +
+        scale_x_continuous(breaks = seq(138, 462, 54)) +
+        geom_freqpoly(breaks = seq(), color='red') + 
+        labs(title = "Níveis de triglicerídeos de 26 pacientes",
+            subtitle = "",
+            x = "Nível (em miligramas por decilitro de sangue)",
+            y = "Frequência") +
+        theme_ipsum(plot_title_size = 12, axis_title_size = 10)
+```
+
+
+```{r, echo=FALSE}
+library("ggplot2")
+library(hrbrthemes)
+
+# 6 classes
+
+Aposentadoria <- tibble(
+            idade = c(70, 54, 55, 71, 57, 58, 63, 65, 60, 66, 57, 62, 63, 60, 63, 60, 66, 60, 67, 69, 69, 52, 61, 73))
+
+Aposentadoria %>%
+ ggplot(aes(x = idade)) +
+        geom_histogram(color = "gray", fill = "black", alpha = 0.9, breaks = seq(52, 73, 4))  +
+        scale_x_continuous(breaks = seq(52, 73, 4)) +
+        geom_freqpoly(breaks = seq(52, 73, 4), color='red') + 
+        labs(title = "Idades para aposentadoria de 24 médicos",
+            subtitle = "",
+            x = "Idade",
+            y = "Frequência") +
+        theme_ipsum(plot_title_size = 12, axis_title_size = 10)
+```
+
+
+```{r, echo = FALSE}
+library("ggplot2")
+library(hrbrthemes)
+
+# 5 classes
+
+Independencia <- tibble(
+            idade = c(40, 53, 46, 39, 38, 35, 50, 37, 48, 41, 70, 32, 41, 52, 40, 50, 65, 46, 30, 34, 69, 38, 45, 33, 41, 44, 63, 60, 26, 42, 34, 50, 42, 52, 37, 35, 45, 36, 42, 47, 46, 30, 26, 55, 57, 45, 33, 60, 62, 35, 46, 45, 33, 53, 49, 50))
+
+Independencia %>%
+ ggplot(aes(x = idade)) +
+        geom_histogram(color = "red", fill = "blue", alpha = 0.9, breaks = seq(26, 70, 9))  +
+        scale_x_continuous(breaks = seq(26, 70, 9)) +
+        geom_freqpoly(breaks = seq(26, 70, 9), color='red') + 
+        labs(title = "Idades dos signatários da Declaração de Independência dos EUA",
+            subtitle = "(Fonte: The U.S. National Archives & Records Administration.)",
+            x = "Idade",
+            y = "Frequência") +
+        theme_ipsum(plot_title_size = 12, axis_title_size = 10)
+
+```
+
+
+```{r, echo=FALSE}
+library("ggplot2")
+library(hrbrthemes)
+
+# 8 classes
+
+Banco <- tibble(
+            quantia = c(72, 84, 61, 76, 104, 76, 86, 92, 80, 88, 98, 76, 97, 82, 84, 67, 70, 81, 82, 89, 74, 73, 86, 81, 85, 78, 82, 80, 91, 83))
+
+Banco %>%
+ ggplot(aes(x = quantia)) +
+        geom_histogram(color = "black", fill = "white", alpha = 0.9, breaks = seq(61, 104, 5.3))  +
+        scale_x_continuous(breaks = seq(61, 104, 5.3)) +
+        geom_freqpoly(breaks = seq(61, 104, 5.3), color='red') + 
+        labs(title = "Quantias retiradas de um banco diariamente em um período de 30 dias",
+            subtitle = "",
+            x = "Quantia (em centenas de dólares)",
+            y = "Frequência") +
+        theme_ipsum(plot_title_size = 12, axis_title_size = 10)
+
+```
+
+::: {.rmdbox}
+  As duas primeiras classes são menores que US$ 9.000, portanto esse valor cobrirá aproximadamente 25 dias, considerando um mês de 30 dias. Logo, a partir do vigésimo sexto mês o caixa ficará sem dinheiro.  
+:::
+
+# Boxplots
+
+```{r, echo=FALSE}
+library("ggplot2")
+library(hrbrthemes)
+
+HorasTV <- tibble(
+  QtdHoras = c(2, 4, 1, 5, 7, 2, 5, 4, 4, 2, 3, 6, 4, 3, 5, 2, 0, 3, 5, 9, 4, 5, 2, 1, 3, 6, 7, 2))
+
+summary(HorasTV)
+
+HorasTV %>%
+  ggplot(aes(y = QtdHoras)) +
+    geom_boxplot(fill = 'blue') + 
+    scale_x_continuous(breaks = NULL) + 
+    scale_y_continuous(breaks = seq(0, 28, 2)) +
+    labs(y = "Quantidade de horas",
+         title = "Quantidade de horas que as pessoas assistem TV diariamente") + 
+    theme_ipsum(plot_title_size = 12,
+    axis_title_size = 10)
+```
+
+::: {.rmdbox}
+  75% das pessoas assistem não mais que 5 horas de televisão por dia.
+:::
+
+```{r, echo=FALSE}
+library("ggplot2")
+library(hrbrthemes)
+
+Aeronave <- tibble(
+  Trajeto = c(2.8, 2.0, 3.0, 3.0, 3.2, 5.9, 3.5, 3.6, 1.8, 5.5, 3.7, 5.2, 3.8, 3.9, 6.0, 2.5, 4.0, 4.1, 4.6, 5.0, 5.5, 6.0))
+
+summary(Aeronave)
+
+Aeronave %>%
+  ggplot(aes(y = Trajeto)) +
+    geom_boxplot(fill = 'green') + 
+    scale_x_continuous(breaks = NULL) + 
+    scale_y_continuous(breaks = seq(0, 22, 0.2)) +
+    labs(y = "Trajeto em milhas",
+         title = "Trajeto(em milhas) de 22 aeronaves a partir de um aeroporto") +
+    theme_ipsum(plot_title_size = 12,
+    axis_title_size = 10)
+
+```
+
+# Barras e colunas 
+
+```{r, echo=FALSE}
+library(scales)
+library(ggplot2)
+library(hrbrthemes)
+
+    df <- data.frame(local = c("At home", "Friend's house", "Pub or restaurant", "Another place", "Don't know"),
+                qtd <- c(620, 110, 50, 100, 130))
+
+
+p <- ggplot(data=df, aes(x = fct_rev(fct_infreq(local)), y=qtd)) +
+        geom_bar(stat="identity", fill = "dodgerblue") +
+        geom_text(aes(x=local, y=qtd, label = percent((qtd*100)/101000), vjust=-0.5)) + 
+        labs(title = "Onde adultos americanos costumam estar à meia-noite na virada do ano",
+            subtitle = "Pesquisa (Adaptado de: Rasmussen Reports.)",
+            x = "Local",
+            y = "Quantidade de pessoas") +
+        theme_ipsum(plot_title_size = 12,
+        axis_title_size = 10)
+p
+```
+
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(hrbrthemes)
+library(scales)
+
+ProdutosEsportivos <- tibble(
+  Vendas = c(9.7, 18.4, 27.5, 26.1),
+  Tipo = c("Vestuário", "Calçados", "Equipamentos", "Transporte recreativo"))
+
+
+ProdutosEsportivos %>%
+ ggplot(aes(x = fct_rev(fct_infreq(Tipo)), y=Vendas)) +
+        geom_bar(stat="identity", fill = "#6495ED") +
+        geom_text(aes(x=Tipo, y=Vendas, label = percent((Vendas*100)/8100.7), vjust=-0.5)) + 
+        labs(title = "Vendas de produtos esportivos nos Estados Unidos",
+            subtitle = "Fonte: National Sporting Goods Association.",
+            x = "Tipo",
+            y = "Valor (em bilhões de dólares)") +
+        theme_ipsum(plot_title_size = 12,
+        axis_title_size = 10)
+
+```
+
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(hrbrthemes)
+library(scales)
+
+Beatles <- tibble(
+  Discos = c("Diamante", "Multiplatina", "Platina", "Ouro", "Nenhum"),
+  Numero = c(3, 11, 4, 1, 8))
+
+Beatles %>%
+ ggplot(aes(x = fct_rev(fct_infreq(Discos)), y=Numero)) +
+        geom_bar(stat="identity", fill = "#8B0000") +
+        geom_text(aes(x=Discos, y=Numero, label = percent((Numero*100)/2700), vjust=-0.5)) + 
+        labs(title = "Certificações por vendas dos 27 discos dos The Beatles",
+        subtitle = "(Fonte: RIAA.)",
+        x = "Disco",
+        y = "Numero") +
+        theme_ipsum(plot_title_size = 12,
+        axis_title_size = 10)
+```
+
+# Linhas
+
+```{r, echo=FALSE}
+library(hrbrthemes)
+library(ggplot2)
+
+PIB <- tibble(
+  Ano = c(2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011),
+  Porcentagem = c(14.2, 13.1, 12.7, 12.3, 12.5, 12.4, 12.3, 12.1, 11.4, 11.0, 11.2, 11.5))
+
+PIB %>%
+  ggplot(aes(x = Ano, y=Porcentagem)) +
+    geom_line() + 
+    scale_x_continuous(breaks = seq(2000, 2011, 1)) + 
+     scale_y_continuous(breaks = seq(11.0, 14.2)) +
+    labs(title = "Percentual do PIB dos Estados Unidos relativo ao setor industrial em um período de 11 anos",
+         subtitle = "Pesquisa (Adaptado de: Rasmussen Reports.)",
+         x = "Ano", 
+         y = "Porcentagem") +
+    theme_ipsum(plot_title_size = 12,
+    axis_title_size = 10)
+```
+
+
+```{r, echo=FALSE}
+library(hrbrthemes)
+library(ggplot2)
+
+
+Desemprego <- tibble(
+  Ano = c(2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012),
+  Porcentagem = c(4.7, 5.8, 6.0, 5.5, 5.1, 4.6, 4.6, 5.8, 9.3, 9.6, 8.9, 8.1))
+
+Desemprego %>%
+  ggplot(aes(x = Ano, y=Porcentagem)) +
+    geom_line() + 
+        scale_x_continuous(breaks = seq(2000, 2012, 1)) + 
+    
+        labs(title = "Taxas de desemprego nos Estados Unidos em um período de 12 anos",
+         subtitle = "(Fonte: U.S. Bureau of Labor Statistics.)",
+         x = "Ano", 
+         y = "Porcentagem") +
+    theme_ipsum(plot_title_size = 12, axis_title_size = 10)
+```
+
+::: {.rmdbox}
+  
+  Certamente, um dos principais fatores que eleveram a taxa de desemprego nos EUA durante o período de 2007 à 2010 foi a crise econômica que o país sofreu devido à quebra do tradicional banco de investimento Lehman Brothers e de vários outros bancos em um efeito dominó.   
+
+:::
+
+
+
+
